@@ -1,0 +1,268 @@
+import React, { useState, useEffect } from 'react';
+import { Heart, MessageCircle, User, RefreshCw, CheckCircle2 } from 'lucide-react';
+
+const App = () => {
+  // 1. 상태 관리: 케이스 (both, wife_only, husband_only, none) 및 사용자 역할 (husband, wife)
+  const [currentCase, setCurrentCase] = useState('both');
+  const [role, setRole] = useState('husband'); // husband or wife
+
+  // 데이터 정의
+  const cases = {
+    both: {
+      syncRate: 100,
+      title: "서로에게 딱 맞는 연락의 결",
+      subtitle: "서로가 바라는 완벽한 연락의 결을 가졌어요",
+      summaryIcon: <Heart className="w-8 h-8 text-rose-500 fill-rose-500" />,
+      husbandMatch: true,
+      wifeMatch: true,
+    },
+    wife_only: {
+      syncRate: 50,
+      title: "예비 신랑분이 예비 신부분의 스타일을 잘 맞춰주고 있어요",
+      subtitle: "예비 신부가 원하는 스타일을 예비 신랑분이 정확히 알고 계시네요",
+      summaryIcon: <div className="relative"><User className="w-8 h-8 text-pink-400" /><Heart className="absolute -top-1 -right-1 w-4 h-4 text-rose-500 fill-rose-500" /></div>,
+      husbandMatch: false,
+      wifeMatch: true,
+    },
+    husband_only: {
+      syncRate: 50,
+      title: "예비 신부분이 예비 신랑분의 스타일을 잘 맞춰주고 있어요",
+      subtitle: "예비 신랑분이 꿈꾸던 연락 스타일을 예비 신부분이 실천하고 계시네요",
+      summaryIcon: <div className="relative"><User className="w-8 h-8 text-blue-400" /><Heart className="absolute -top-1 -right-1 w-4 h-4 text-rose-500 fill-rose-500" /></div>,
+      husbandMatch: true,
+      wifeMatch: false,
+    },
+    none: {
+      syncRate: 15,
+      title: "서로의 다름을 이해하면 더 가까워질 거예요",
+      subtitle: "서로의 연락 스타일을 조금 더 알아가는 시간이 필요해요",
+      summaryIcon: <MessageCircle className="w-8 h-8 text-gray-400" />,
+      husbandMatch: false,
+      wifeMatch: false,
+    }
+  };
+
+  const data = cases[currentCase];
+
+  // 개인화 문구 생성 함수
+  const getPersonalizedMessage = () => {
+    if (currentCase === 'both') {
+      return role === 'husband' ? "예비 신부분과 당신은 천생연분이네요" : "예비 신랑분과 당신은 환상의 짝꿍이에요";
+    }
+    if (currentCase === 'wife_only') {
+      return role === 'husband' 
+        ? "예비 신부분이 당신의 연락 스타일에 아주 만족하고 계십니다" 
+        : "예비 신랑분의 연락 스타일이 당신이 원하던 바로 그 모습이네요";
+    }
+    if (currentCase === 'husband_only') {
+      return role === 'husband' 
+        ? "예비 신부분의 연락 스타일이 당신이 원하던 바로 그 모습이네요" 
+        : "예비 신랑분이 당신의 연락 스타일에 아주 만족하고 계십니다";
+    }
+    return "서로 대화를 통해 간격을 좁혀볼까요";
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900">
+      <div className="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-100">
+        
+        {/* 상단 컨트롤 (데모용) */}
+        <div className="bg-slate-800 p-3 flex justify-between items-center text-white text-xs">
+          <div className="flex gap-2">
+            <span className="opacity-70">케이스:</span>
+            <select 
+              className="bg-slate-700 rounded px-1"
+              value={currentCase} 
+              onChange={(e) => setCurrentCase(e.target.value)}
+            >
+              <option value="both">둘 다 일치</option>
+              <option value="wife_only">신부만 만족</option>
+              <option value="husband_only">신랑만 만족</option>
+              <option value="none">둘 다 불일치</option>
+            </select>
+          </div>
+          <button 
+            onClick={() => setRole(role === 'husband' ? 'wife' : 'husband')}
+            className="flex items-center gap-1 bg-indigo-600 px-2 py-1 rounded hover:bg-indigo-500 transition-colors"
+          >
+            <RefreshCw size={12} />
+            {role === 'husband' ? '예비 신랑 시점' : '예비 신부 시점'}
+          </button>
+        </div>
+
+        <div className="p-6 space-y-8">
+          
+          {/* 3. 요약 카드 */}
+          <section className="bg-indigo-50 rounded-2xl p-5 border border-indigo-100 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="bg-white p-3 rounded-xl shadow-sm">
+              {data.summaryIcon}
+            </div>
+            <div>
+              <h2 className="font-bold text-lg leading-tight text-indigo-900">{data.title}</h2>
+              <p className="text-sm text-indigo-600 mt-1 italic">{getPersonalizedMessage()}</p>
+            </div>
+          </section>
+
+          {/* 1. 동기화 지수 */}
+          <section className="space-y-4">
+            <div className="flex justify-between items-end px-2">
+              <div className="flex flex-col items-center gap-2">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${currentCase === 'none' ? 'bg-slate-200' : 'bg-blue-100'}`}>
+                  <User className={currentCase === 'none' ? 'text-slate-400' : 'text-blue-500'} />
+                </div>
+                <span className="text-[10px] font-medium text-slate-500">예비 신랑</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 flex-1 px-4">
+                <span className={`text-2xl font-black ${data.syncRate === 100 ? 'text-amber-500' : data.syncRate === 50 ? 'text-indigo-600' : 'text-slate-400'}`}>
+                  {data.syncRate}%
+                </span>
+                <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden relative">
+                  <div 
+                    className={`h-full transition-all duration-1000 ease-out rounded-full ${
+                      currentCase === 'both' ? 'bg-gradient-to-r from-amber-400 to-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]' :
+                      currentCase === 'wife_only' ? 'bg-indigo-500 ml-auto w-1/2' :
+                      currentCase === 'husband_only' ? 'bg-indigo-500 mr-auto w-1/2' :
+                      'bg-slate-300 w-[15%]'
+                    }`}
+                    style={{ 
+                      width: currentCase === 'both' ? '100%' : (currentCase === 'none' ? '15%' : '50%'),
+                      marginLeft: currentCase === 'wife_only' ? '50%' : '0'
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${currentCase === 'none' ? 'bg-slate-200' : 'bg-pink-100'}`}>
+                  <User className={currentCase === 'none' ? 'text-slate-400' : 'text-pink-500'} />
+                </div>
+                <span className="text-[10px] font-medium text-slate-500">예비 신부</span>
+              </div>
+            </div>
+            <p className="text-center text-sm font-medium text-slate-600 px-4">
+              {data.subtitle}
+            </p>
+          </section>
+
+          {/* 2. 대각선 화살표 다이얼로그 */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="h-px flex-1 bg-slate-200"></div>
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">피드백 상세</span>
+              <div className="h-px flex-1 bg-slate-200"></div>
+            </div>
+
+            {/* 컨테이너에 여백을 주어 화살표 머리가 잘리지 않게 함 */}
+            <div className="relative grid grid-cols-2 gap-12 py-8 px-4">
+              {/* 대각선 연결선 SVG */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 0 }}>
+                <svg 
+                  className="w-full h-full" 
+                  viewBox="0 0 200 160" 
+                  preserveAspectRatio="none"
+                  style={{ overflow: 'visible' }}
+                >
+                  <defs>
+                    <marker id="arrowhead-blue" markerWidth="8" markerHeight="8" refX="7" refY="4" orientation="auto">
+                      <polygon points="0 0, 8 4, 0 8" fill="#6366f1" />
+                    </marker>
+                    <marker id="arrowhead-gray" markerWidth="8" markerHeight="8" refX="7" refY="4" orientation="auto">
+                      <polygon points="0 0, 8 4, 0 8" fill="#cbd5e1" />
+                    </marker>
+                  </defs>
+
+                  {/* 예비 신랑의 실제(Bottom-L) -> 예비 신부의 희망(Top-R) */}
+                  <path 
+                    d="M 50 130 L 150 30" 
+                    fill="none" 
+                    stroke={data.wifeMatch ? "#6366f1" : "#cbd5e1"} 
+                    strokeWidth={data.wifeMatch ? "2.5" : "1.5"} 
+                    strokeDasharray={data.wifeMatch ? "0" : "4"}
+                    markerEnd={data.wifeMatch ? "url(#arrowhead-blue)" : "url(#arrowhead-gray)"}
+                    className="transition-all duration-700"
+                  />
+                  
+                  {/* 예비 신부의 실제(Bottom-R) -> 예비 신랑의 희망(Top-L) */}
+                  <path 
+                    d="M 150 130 L 50 30" 
+                    fill="none" 
+                    stroke={data.husbandMatch ? "#6366f1" : "#cbd5e1"} 
+                    strokeWidth={data.husbandMatch ? "2.5" : "1.5"} 
+                    strokeDasharray={data.husbandMatch ? "0" : "4"}
+                    markerEnd={data.husbandMatch ? "url(#arrowhead-blue)" : "url(#arrowhead-gray)"}
+                    className="transition-all duration-700"
+                  />
+
+                  {/* 하트 연출 (교차점) */}
+                  {currentCase === 'both' && (
+                    <g transform="translate(100, 80) scale(0.6)">
+                       <path d="M0 10 C-10 -10, -30 -10, -30 10 C-30 30, 0 50, 0 50 C 0 50, 30 30, 30 10 C 30 -10, 10 -10, 0 10" fill="#f43f5e" className="animate-pulse" />
+                    </g>
+                  )}
+                </svg>
+              </div>
+
+              {/* 왼쪽 섹션 */}
+              <div className="space-y-16 z-10">
+                <div className="text-center">
+                  <span className="text-[10px] font-bold text-blue-500 block mb-1">희망</span>
+                  <div className={`p-2 rounded-xl border-2 transition-all ${data.husbandMatch ? 'border-indigo-500 bg-indigo-50 shadow-sm' : 'border-slate-100 bg-white opacity-60'}`}>
+                    <p className="text-[10px] text-slate-400">바라는 빈도</p>
+                    <p className="text-xs font-bold">주 3-4회</p>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className={`p-2 rounded-xl border-2 border-slate-100 bg-white shadow-sm`}>
+                    <p className="text-[10px] text-slate-400">실제 스타일</p>
+                    <p className="text-xs font-bold">매일 연락</p>
+                  </div>
+                  <span className="text-[10px] font-bold text-blue-500 block mt-1">실제</span>
+                </div>
+              </div>
+
+              {/* 오른쪽 섹션 */}
+              <div className="space-y-16 z-10">
+                <div className="text-center">
+                  <span className="text-[10px] font-bold text-pink-500 block mb-1">희망</span>
+                  <div className={`p-2 rounded-xl border-2 transition-all ${data.wifeMatch ? 'border-indigo-500 bg-indigo-50 shadow-sm' : 'border-slate-100 bg-white opacity-60'}`}>
+                    <p className="text-[10px] text-slate-400">바라는 빈도</p>
+                    <p className="text-xs font-bold">매일 연락</p>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className={`p-2 rounded-xl border-2 border-slate-100 bg-white shadow-sm`}>
+                    <p className="text-[10px] text-slate-400">실제 스타일</p>
+                    <p className="text-xs font-bold">주 3-4회</p>
+                  </div>
+                  <span className="text-[10px] font-bold text-pink-500 block mt-1">실제</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* 4. 추가 팁 */}
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2">
+             <div className="flex items-center gap-2">
+                <CheckCircle2 size={16} className="text-indigo-600" />
+                <span className="text-sm font-bold text-slate-700">더 나은 결을 만드는 팁</span>
+             </div>
+             <p className="text-xs text-slate-500 leading-relaxed">
+               {currentCase === 'both' 
+                ? "현재의 완벽한 밸런스를 유지하기 위해 가끔은 특별한 서프라이즈 연락을 시도해 보세요" 
+                : "상대방이 선호하는 연락 주기에 맞춰 알림 설정을 조정해보는 것은 어떨까요? 작은 배려가 큰 변화를 만듭니다"}
+             </p>
+          </div>
+
+        </div>
+        
+        {/* 하단 버튼 */}
+        <div className="p-6 pt-0">
+          <button className="w-full bg-slate-900 text-white font-bold py-4 rounded-2xl hover:bg-slate-800 transition-all active:scale-[0.98]">
+            대화 가이드 확인하기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
